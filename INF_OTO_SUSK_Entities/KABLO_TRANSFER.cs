@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace INF_OTO_SUSK_Entities
 {
-    public class MEKANIK_TRANSFER
+    public class KABLO_TRANSFER
     {
         [Key]
         public string HAM_KODU { get; set; }
@@ -15,6 +15,9 @@ namespace INF_OTO_SUSK_Entities
         public int ILKTRANSFER_DEPO { get; set; }
         public decimal IKINCITRANSFER { get; set; }
         public int IKINCITRANSFER_DEPO { get; set; }
-       
+        public decimal UCUNCUTRANSFER { get; set; }
+        public int UCUNCUTRANSFER_DEPO { get; set; }
+        public decimal DORDUNCUTRANSFER { get; set; }
+        public int DORDUNCUTRANSFER_DEPO { get; set; }
     }
 }

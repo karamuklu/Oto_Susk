@@ -1,11 +1,7 @@
 ﻿using INF_OTO_SUSK_Entities;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace INF_OTO_SUSK_DataAccessLayer
 {
@@ -13,21 +9,46 @@ namespace INF_OTO_SUSK_DataAccessLayer
     {
         public List<SUSK_LISTESI_MKA> YARIMAMULSUSK_LISTESI_MEK()
         {
-            string sqlCumle = "SELECT TARIH,ISEMRINO,STOK_KODU,MIKTAR,REFISEMRINO FROM SUSK_LISTESI_MKA";
-
+            string sqlCumle = "SELECT ISEMRINO,STOK_KODU,OKUTMA_MIKTAR,URETIM_ASAMA,INCKEYNO FROM SUSK_LISTESI_MKA ";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<SUSK_LISTESI_MKA>(sqlCumle).ToList();
         }
+
         public List<SUSK_LISTESI_ESTAP> ESTAPSUSK_LISTESI()//Hakanın Listesi
         {
-            string sqlCumle = "SELECT A.TARIH,A.ISEMRINO,A.STOK_KODU, A.MIKTAR FROM (SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM _SG_..INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0 )A";
-
+            string sqlCumle = "SELECT A.TARIH,A.ISEMRINO,A.STOK_KODU, A.MIKTAR FROM (SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM _SG_..INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0 )A  WHERE A.ISEMRINO NOT LIKE 'T%' AND A.ISEMRINO IN (SELECT ISEMRINO FROM INFORM..TBLISEMRI) ";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<SUSK_LISTESI_ESTAP>(sqlCumle).ToList();
         }
+
+        public List<SUSK_LISTESI_TRAFO> TRAFOSUSK_LISTESI()//Trafo işemri Listesi
+        {
+            string sqlCumle = "SELECT * from TRAFO_SUSKLIST";
+            INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
+            return context.Database.SqlQuery<SUSK_LISTESI_TRAFO>(sqlCumle).ToList();
+        }
+        public List<SUSK_LISTESI_KABLO> KABLOSUSK_LISTESI()//Kablo işemri Listesi
+        {
+            string sqlCumle = "select * from KABLO_SUSKLIST_MKA";
+            INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
+            return context.Database.SqlQuery<SUSK_LISTESI_KABLO>(sqlCumle).ToList();
+        }
+        public List<WIP_SUSK_MKA> WIP_SUSK_LISTESI()//Wip Cihaz işemri Listesi
+        {
+            string sqlCumle = "select * from WIP_SUSK_MKA";
+            INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
+            return context.Database.SqlQuery<WIP_SUSK_MKA>(sqlCumle).ToList();
+        }
+
+        public List<TBLURTDURUM> TBLURTDURUM()//Serili Ürün SUSK
+        {
+            string sqlCumle = "select * from MKA..TBLURTDURUM where URETIM_ASAMA = 'KAPAMA' and STOK_KODU not like '148%' and(susk_durumu = 'H' or susk_Durumu is null) order by isemrino,seri_no ";
+            MKA_Context context = new MKA_Context();
+            return context.Database.SqlQuery<TBLURTDURUM>(sqlCumle).ToList();
+        }
         public List<SUSK_LISTESI_ESTAP> YARIMAMULSUSK_LISTESI(string mamul_Kodu, string refIsemriNo, decimal isemriMiktar)
         {
-            string sqlCumle = "SELECT SEVIYE,isemri.ISEMRINO,isnull(susk.URETSON_FISNO,'SUSK YAPILMAMIS')SUSK_NO, isemri.TARIH, isemri.STOK_KODU, isemri.MIKTAR FROM INFORM20..TBLISEMRI isemri LEFT OUTER JOIN INFORM20..TBLSTOKURS susk ON isemri.ISEMRINO = susk.URETSON_SIPNO AND isemri.STOK_KODU = susk.URETSON_MAMUL CROSS APPLY(SELECT * from INFORM20..SUSKONCESI_HAZIRLIK_MKA('" + mamul_Kodu + "','" + refIsemriNo + "'," + isemriMiktar + ",'E',''))A WHERE isemri.REFISEMRINO = '" + refIsemriNo + "' AND a.stok_kodu = isemri.STOK_KODU AND isemri.MIKTAR > isnull(susk.URETSON_MIKTAR, 0) ORDER BY seviye DESC";
+            string sqlCumle = "SELECT SEVIYE,isemri.ISEMRINO,isnull(susk.URETSON_FISNO,'SUSK YAPILMAMIS')SUSK_NO, isemri.TARIH, isemri.STOK_KODU, isemri.MIKTAR FROM INFORM..TBLISEMRI isemri LEFT OUTER JOIN INFORM..TBLSTOKURS susk ON isemri.ISEMRINO = susk.URETSON_SIPNO AND isemri.STOK_KODU = susk.URETSON_MAMUL CROSS APPLY(SELECT * from INFORM..SUSKONCESI_HAZIRLIK_MKA('" + mamul_Kodu + "','" + refIsemriNo + "'," + isemriMiktar + ",'E',''))A WHERE isemri.REFISEMRINO = '" + refIsemriNo + "' AND a.stok_kodu = isemri.STOK_KODU AND isemri.MIKTAR > isnull(susk.URETSON_MIKTAR, 0) ORDER BY seviye DESC";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<SUSK_LISTESI_ESTAP>(sqlCumle).ToList();
         }
@@ -37,7 +58,7 @@ namespace INF_OTO_SUSK_DataAccessLayer
             //int month = tarih.Month;
             //int year = tarih.Year;
             //string tamTarih = month + "-" + day + "-" + year;
-            string sqlCumle = "SELECT B.STOK_KODU ALTMAMUL,Sum(TRANSFERMIKTAR)TRANSFERMIKTAR, ISNULL((SELECT t.TOP_GIRIS_MIK - t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM20..TBLSTOKPH t WHERE t.DEPO_KODU = '117' AND t.STOK_KODU = B.STOK_KODU),0) BAKIYE117 FROM(SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM20..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0)A CROSS APPLY INFORM20..SUSKONCESI_HAZIRLIK_MKA(a.stok_kodu,a.isemrino,a.miktar,'E','2-17-2020') B where b.refisemrino=a.isemrino GROUP BY B.STOK_KODU";
+            string sqlCumle = "SELECT B.STOK_KODU ALTMAMUL,Sum(TRANSFERMIKTAR)TRANSFERMIKTAR, ISNULL((SELECT t.TOP_GIRIS_MIK - t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM..TBLSTOKPH t WHERE t.DEPO_KODU = '117' AND t.STOK_KODU = B.STOK_KODU),0) BAKIYE117 FROM(SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0)A CROSS APPLY INFORM..SUSKONCESI_HAZIRLIK_MKA(a.stok_kodu,a.isemrino,a.miktar,'E','2-17-2020') B where b.refisemrino=a.isemrino GROUP BY B.STOK_KODU";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<YARIMAMUL>(sqlCumle).ToList();
         }
@@ -47,7 +68,7 @@ namespace INF_OTO_SUSK_DataAccessLayer
             //int month = tarih.Month;
             //int year = tarih.Year;
             //string tamTarih = month + "-" + day + "-" + year;
-            string sqlCumle = "SELECT D.ALTMAMUL, ISNULL(D.TRANSFERMIKTAR,0) TRANSFERMIKTAR FROM (SELECT C.ALTMAMUL,CASE WHEN C.BAKIYE117 > 0 AND C.TRANSFERMIKTAR >= C.BAKIYE117 THEN C.BAKIYE117 WHEN C.BAKIYE117 > 0 AND C.TRANSFERMIKTAR < C.BAKIYE117 THEN C.TRANSFERMIKTAR END TRANSFERMIKTAR FROM(         SELECT B.STOK_KODU ALTMAMUL, Sum(TRANSFERMIKTAR) TRANSFERMIKTAR , ISNULL((SELECT t.TOP_GIRIS_MIK -t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM20..TBLSTOKPH t WHERE t.DEPO_KODU = '117' AND t.STOK_KODU = B.STOK_KODU),0) BAKIYE117 FROM (SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM20..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0)A CROSS APPLY INFORM20..SUSKONCESI_HAZIRLIK_MKA(a.stok_kodu, a.isemrino, a.miktar, 'E', '') B where b.refisemrino = a.isemrino GROUP BY B.STOK_KODU)C)D WHERE D.TRANSFERMIKTAR>0 ORDER BY 1";
+            string sqlCumle = "SELECT D.ALTMAMUL, ISNULL(D.TRANSFERMIKTAR,0) TRANSFERMIKTAR FROM (SELECT C.ALTMAMUL,CASE WHEN C.BAKIYE117 > 0 AND C.TRANSFERMIKTAR >= C.BAKIYE117 THEN C.BAKIYE117 WHEN C.BAKIYE117 > 0 AND C.TRANSFERMIKTAR < C.BAKIYE117 THEN C.TRANSFERMIKTAR END TRANSFERMIKTAR FROM(         SELECT B.STOK_KODU ALTMAMUL, Sum(TRANSFERMIKTAR) TRANSFERMIKTAR , ISNULL((SELECT t.TOP_GIRIS_MIK -t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM..TBLSTOKPH t WHERE t.DEPO_KODU = '117' AND t.STOK_KODU = B.STOK_KODU),0) BAKIYE117 FROM (SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0)A CROSS APPLY INFORM..SUSKONCESI_HAZIRLIK_MKA(a.stok_kodu, a.isemrino, a.miktar, 'E', '') B where b.refisemrino = a.isemrino GROUP BY B.STOK_KODU)C)D WHERE D.TRANSFERMIKTAR>0 ORDER BY 1";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<YARIMAMUL>(sqlCumle).ToList();
         }
@@ -57,38 +78,38 @@ namespace INF_OTO_SUSK_DataAccessLayer
             //int month = tarih.Month;
             //int year = tarih.Year;
             //string tamTarih = month + "-" + day + "-" + year;
-            string sqlCumle = "SELECT D.ALTMAMUL, ISNULL(D.ISEMRIMIKTAR,0) TRANSFERMIKTAR FROM (SELECT C.ALTMAMUL,C.TRANSFERMIKTAR,C.BAKIYE118,CASE WHEN C.BAKIYE118 > C.TRANSFERMIKTAR THEN C.TRANSFERMIKTAR WHEN C.TRANSFERMIKTAR > C.BAKIYE118 THEN C.TRANSFERMIKTAR - C.BAKIYE118     WHEN C.BAKIYE118 = C.TRANSFERMIKTAR THEN 0   END ISEMRIMIKTAR FROM(SELECT B.STOK_KODU ALTMAMUL, Sum(TRANSFERMIKTAR)TRANSFERMIKTAR, ISNULL((SELECT t.TOP_GIRIS_MIK - t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM20..TBLSTOKPH t WHERE t.DEPO_KODU = '118' AND t.STOK_KODU = B.STOK_KODU), 0) BAKIYE118 FROM ( SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM20..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0)A CROSS APPLY INFORM20..SUSKONCESI_HAZIRLIK_MKA(a.stok_kodu, a.isemrino, a.miktar, 'E', '') B where b.refisemrino IS null GROUP BY B.STOK_KODU)C ) D WHERE D.ISEMRIMIKTAR > 0 ORDER BY 1";
+            string sqlCumle = "SELECT D.ALTMAMUL, ISNULL(D.ISEMRIMIKTAR,0) TRANSFERMIKTAR FROM (SELECT C.ALTMAMUL,C.TRANSFERMIKTAR,C.BAKIYE118,CASE WHEN C.BAKIYE118 > C.TRANSFERMIKTAR THEN C.TRANSFERMIKTAR WHEN C.TRANSFERMIKTAR > C.BAKIYE118 THEN C.TRANSFERMIKTAR - C.BAKIYE118     WHEN C.BAKIYE118 = C.TRANSFERMIKTAR THEN 0   END ISEMRIMIKTAR FROM(SELECT B.STOK_KODU ALTMAMUL, Sum(TRANSFERMIKTAR)TRANSFERMIKTAR, ISNULL((SELECT t.TOP_GIRIS_MIK - t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM..TBLSTOKPH t WHERE t.DEPO_KODU = '118' AND t.STOK_KODU = B.STOK_KODU), 0) BAKIYE118 FROM ( SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0)A CROSS APPLY INFORM..SUSKONCESI_HAZIRLIK_MKA(a.stok_kodu, a.isemrino, a.miktar, 'E', '') B where b.refisemrino IS null GROUP BY B.STOK_KODU)C ) D WHERE D.ISEMRIMIKTAR > 0 ORDER BY 1";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<YARIMAMUL>(sqlCumle).ToList();
         }
         public List<SUSK_LISTESI_ESTAP> YARIMAMULSUSK_LISTESI_J()
         {
-            string sqlCumle = "SELECT ISEMRINO,STOK_KODU,MIKTAR,TARIH  FROM INFORM20..TBLISEMRI t LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM20..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON t.ISEMRINO = susk.URETSON_SIPNO WHERE t.ISEMRINO LIKE 'J%' AND t.MIKTAR - ISNULL(SUSK.SUSKMIKTAR, 0) > 0";
+            string sqlCumle = "SELECT ISEMRINO,STOK_KODU,MIKTAR,TARIH  FROM INFORM..TBLISEMRI t LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON t.ISEMRINO = susk.URETSON_SIPNO WHERE t.ISEMRINO LIKE 'J%' AND t.MIKTAR - ISNULL(SUSK.SUSKMIKTAR, 0) > 0";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<SUSK_LISTESI_ESTAP>(sqlCumle).ToList();
         }
         public List<SUSK_LISTESI_ESTAP> YARIMAMULSUSK_LISTESI_MKA()
         {
-            //SELECT ISEMRINO, STOK_KODU, MIKTAR, TARIH  FROM INFORM20..TBLISEMRI t LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM20..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON t.ISEMRINO = susk.URETSON_SIPNO WHERE t.ISEMRINO LIKE 'J%' AND t.MIKTAR - ISNULL(SUSK.SUSKMIKTAR, 0) > 0
-            string sqlCumle = "SELECT b.stok_kodu,b.transfermiktar miktar,isemri.TARIH,isemri.ISEMRINO FROM (SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM20..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0 )A CROSS APPLY INFORM20..SUSKONCESI_HAZIRLIK_MKA(a.stok_kodu, a.isemrino, a.miktar, 'E', '2-17-2020') B     LEFT OUTER JOIN INFORM20..TBLISEMRI isemri ON a.isemrino = isemri.refisemrino AND b.stok_kodu = isemri.stok_kodu LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM20..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON isemri.ISEMRINO = susk.URETSON_SIPNO where isemri.isemrino IS NOT NULL AND isemri.miktar - isnull(susk.SUSKMIKTAR, 0) > 0 AND(isemri.ISEMRINO LIKE 'S%' OR isemri.ISEMRINO LIKE 'H%' OR isemri.ISEMRINO LIKE 'N%' OR isemri.ISEMRINO LIKE 'U%')";
+            //SELECT ISEMRINO, STOK_KODU, MIKTAR, TARIH  FROM INFORM..TBLISEMRI t LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON t.ISEMRINO = susk.URETSON_SIPNO WHERE t.ISEMRINO LIKE 'J%' AND t.MIKTAR - ISNULL(SUSK.SUSKMIKTAR, 0) > 0
+            string sqlCumle = "SELECT b.stok_kodu,b.transfermiktar miktar,isemri.TARIH,isemri.ISEMRINO FROM (SELECT i.TESLIM_TARIHI TARIH, i.ISEMRINO, i.STOK_KODU, i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) MIKTAR FROM INF_MONTAJ_EKRAN_GECICI i LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON i.ISEMRINO = susk.URETSON_SIPNO WHERE i.URETIM_ADET - isnull(susk.SUSKMIKTAR, 0) > 0 )A CROSS APPLY SUSKONCESI_HAZIRLIK_MKA(a.stok_kodu, a.isemrino, a.miktar, 'E', '2-17-2020') B     LEFT OUTER JOIN TBLISEMRI isemri ON a.isemrino = isemri.refisemrino AND b.stok_kodu = isemri.stok_kodu LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON isemri.ISEMRINO = susk.URETSON_SIPNO where isemri.isemrino IS NOT NULL AND isemri.miktar - isnull(susk.SUSKMIKTAR, 0) > 0 AND(isemri.ISEMRINO LIKE 'S%' OR isemri.ISEMRINO LIKE 'H%' OR isemri.ISEMRINO LIKE 'N%' OR isemri.ISEMRINO LIKE 'U%')";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<SUSK_LISTESI_ESTAP>(sqlCumle).ToList();
         }
         public List<YARIMAMUL> AcilacakIsemriListesi_Mekanik()
         {
-            string sqlCumle = "SELECT altmamul,C.IHTIYACMIKTAR TRANSFERMIKTAR  FROM( SELECT altmamul, sum(A.IHTIYACMIKTAR) IHTIYACMIKTAR, ISNULL((SELECT t.TOP_GIRIS_MIK - t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM20..TBLSTOKPH t WHERE t.DEPO_KODU = '117' AND t.STOK_KODU = A.altmamul), 0) BAKIYE117 FROM(SELECT B.STOK_KODU ALTMAMUL, b.transfermiktar IHTIYACMIKTAR FROM dbo.SUSK_LISTESI_MKA s CROSS APPLY INFORM20..SUSKONCESI_HAZIRLIK_MKA(s.stok_kodu, s.isemrino, s.miktar, 'E', '2-17-2020') B WHERE b.stok_kodu NOT LIKE '143%')A GROUP BY altmamul)C WHERE C.BAKIYE117 = 0";
+            string sqlCumle = "SELECT altmamul,C.IHTIYACMIKTAR TRANSFERMIKTAR  FROM( SELECT altmamul, sum(A.IHTIYACMIKTAR) IHTIYACMIKTAR, ISNULL((SELECT t.TOP_GIRIS_MIK - t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM..TBLSTOKPH t WHERE t.DEPO_KODU = '117' AND t.STOK_KODU = A.altmamul), 0) BAKIYE117 FROM(SELECT B.STOK_KODU ALTMAMUL, b.transfermiktar IHTIYACMIKTAR FROM dbo.SUSK_LISTESI_MKA s CROSS APPLY INFORM..SUSKONCESI_HAZIRLIK_MKA(s.stok_kodu, s.isemrino, s.miktar, 'E', '2-17-2020') B WHERE b.stok_kodu NOT LIKE '143%')A GROUP BY altmamul)C WHERE C.BAKIYE117 = 0";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<YARIMAMUL>(sqlCumle).ToList();
         }
         public List<YARIMAMUL> YARIMAMUL_TRANSFERLISTESI_MEK()
         {
-            string sqlCumle = "select* from(SELECT altmamul,CASE WHEN C.BAKIYE117 > C.IHTIYACMIKTAR then C.IHTIYACMIKTAR WHEN C.BAKIYE117 < c.IHTIYACMIKTAR THEN C.BAKIYE117 END TRANSFERMIKTAR FROM(    SELECT altmamul, sum(A.IHTIYACMIKTAR) IHTIYACMIKTAR, ISNULL((SELECT t.TOP_GIRIS_MIK -t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM20..TBLSTOKPH t WHERE t.DEPO_KODU = '117' AND t.STOK_KODU = A.altmamul),0) BAKIYE117   FROM(  SELECT B.STOK_KODU ALTMAMUL, b.transfermiktar IHTIYACMIKTAR FROM dbo.SUSK_LISTESI_MKA s   CROSS APPLY INFORM20..SUSKONCESI_HAZIRLIK_MKA(s.stok_kodu, s.isemrino, s.miktar, 'E', '2-17-2020') B     WHERE b.stok_kodu NOT LIKE '143%')A GROUP BY altmamul)C ) D WHERE D.TRANSFERMIKTAR > 0";
+            string sqlCumle = "select* from(SELECT altmamul,CASE WHEN C.BAKIYE117 > C.IHTIYACMIKTAR then C.IHTIYACMIKTAR WHEN C.BAKIYE117 < c.IHTIYACMIKTAR THEN C.BAKIYE117 END TRANSFERMIKTAR FROM(    SELECT altmamul, sum(A.IHTIYACMIKTAR) IHTIYACMIKTAR, ISNULL((SELECT t.TOP_GIRIS_MIK -t.TOP_CIKIS_MIK AS BAKIYE FROM INFORM..TBLSTOKPH t WHERE t.DEPO_KODU = '117' AND t.STOK_KODU = A.altmamul),0) BAKIYE117   FROM(  SELECT B.STOK_KODU ALTMAMUL, b.transfermiktar IHTIYACMIKTAR FROM dbo.SUSK_LISTESI_MKA s   CROSS APPLY INFORM..SUSKONCESI_HAZIRLIK_MKA(s.stok_kodu, s.isemrino, s.miktar, 'E', '2-17-2020') B     WHERE b.stok_kodu NOT LIKE '143%')A GROUP BY altmamul)C ) D WHERE D.TRANSFERMIKTAR > 0";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<YARIMAMUL>(sqlCumle).ToList();
         }
         public List<SUSK_LISTESI_EKART> YARIMAMULSUSK_LISTESI_EKART()
         {
-            string sqlCumle = "SELECT convert(date,getdate()) TARIH,Ekart.isemrino, Ekart.StokNo STOK_KODU,(Ekart.miktar-isnull((SUSK.SUSKMIKTAR),0))miktar FROM (SELECT isemrino, StokNo, count(*) Miktar FROM(select isemrino, t.StokNo, t.SeriNo,  case when count(*)> 1 THEN 1 else count(*) end miktar from EKartUretim..tblEkartUretimTakip t   WHERE t.IstasyonAdi = 'FCT' AND year(tarih)= 2020 GROUP BY StokNo,isemrino,t.SeriNo )A GROUP BY a.isemrino,A.StokNo)Ekart LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM20..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON ekart.ISEMRINO = susk.URETSON_SIPNO WHERE Ekart.miktar - isnull((SUSK.SUSKMIKTAR), 0) > 0 AND Ekart.isemrino NOT LIKE 'KAYIP%' AND Ekart.isemrino  IN(SELECT isemrino FROM INFORM20..TBLISEMRI where kapali='H')";
+            string sqlCumle = "SELECT convert(date,getdate()) TARIH,Ekart.isemrino, Ekart.StokNo STOK_KODU,(Ekart.miktar-isnull((SUSK.SUSKMIKTAR),0))miktar FROM (SELECT isemrino, StokNo, count(*) Miktar FROM(select isemrino, t.StokNo, t.SeriNo,  case when count(*)> 1 THEN 1 else count(*) end miktar from EKartUretim..tblEkartUretimTakip t   WHERE t.IstasyonAdi = 'FCT' AND year(tarih)= YEAR(GETDATE()) GROUP BY StokNo,isemrino,t.SeriNo )A GROUP BY a.isemrino,A.StokNo)Ekart LEFT OUTER JOIN(SELECT sum(uretson_miktar) SUSKMIKTAR, t.URETSON_SIPNO FROM INFORM..TBLSTOKURS t GROUP BY t.URETSON_SIPNO)SUSK ON ekart.ISEMRINO = susk.URETSON_SIPNO WHERE Ekart.miktar - isnull((SUSK.SUSKMIKTAR), 0) > 0 AND Ekart.isemrino NOT LIKE 'KAYIP%' AND Ekart.isemrino  IN(SELECT isemrino FROM INFORM..TBLISEMRI where kapali='H')";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<SUSK_LISTESI_EKART>(sqlCumle).ToList();
         }
@@ -98,7 +119,6 @@ namespace INF_OTO_SUSK_DataAccessLayer
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<EKART_TRANSFER>(sqlCumle).ToList();
         }
-
         public List<WIPCIHAZ_TRANSFER> WIPCIHAZ_TRANSFER()
         {
             string sqlCumle = " SELECT * FROM WIPSUSK_TRANSFERLIST_MKA  ";
@@ -123,9 +143,21 @@ namespace INF_OTO_SUSK_DataAccessLayer
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<CIHAZ_TRANSFER>(sqlCumle).ToList();
         }
+        public List<TRAFO_TRANSFER> TRAFO_TRANSFERLIST()
+        {
+            string sqlCumle = "  SELECT * FROM TRAFO_TRANSFERLIST_MKA ";
+            INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
+            return context.Database.SqlQuery<TRAFO_TRANSFER>(sqlCumle).ToList();
+        }
+        public List<KABLO_TRANSFER> KABLO_TRANSFERLIST()
+        {
+            string sqlCumle = "  SELECT * FROM KABLO_TRANSFERLIST_MKA ";
+            INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
+            return context.Database.SqlQuery<KABLO_TRANSFER>(sqlCumle).ToList();
+        }
         public List<SUSK_LISTESI_GENEL> INFORM_SUSK_LISTESI()
         {
-            string sqlCumle = "SELECT t.TARIH,t.ISEMRINO,t.STOK_KODU,miktar - isnull(susk.URETSON_MIKTAR, 0) MIKTAR FROM dbo.TBLISEMRI t LEFT OUTER JOIN(SELECT sum(URETSON_MIKTAR) URETSON_MIKTAR, URETSON_MAMUL, URETSON_SIPNO FROM INFORM20..TBLSTOKURS GROUP BY URETSON_MAMUL, URETSON_SIPNO)susk ON t.ISEMRINO = susk.URETSON_SIPNO AND t.STOK_KODU = susk.URETSON_MAMUL LEFT OUTER JOIN TBLISEMRIEK ek ON t.ISEMRINO = ek.ISEMRI WHERE t.KAPALI = 'H' and t.STOK_KODU LIKE '19%' AND miktar-isnull(susk.URETSON_MIKTAR, 0) > 0  AND ek.KT_URT_DURUM='SUSK'";
+            string sqlCumle = "SELECT t.TARIH,t.ISEMRINO,t.STOK_KODU,miktar - isnull(susk.URETSON_MIKTAR, 0) MIKTAR FROM dbo.TBLISEMRI t LEFT OUTER JOIN(SELECT sum(URETSON_MIKTAR) URETSON_MIKTAR, URETSON_MAMUL, URETSON_SIPNO FROM INFORM..TBLSTOKURS GROUP BY URETSON_MAMUL, URETSON_SIPNO)susk ON t.ISEMRINO = susk.URETSON_SIPNO AND t.STOK_KODU = susk.URETSON_MAMUL LEFT OUTER JOIN TBLISEMRIEK ek ON t.ISEMRINO = ek.ISEMRI WHERE t.KAPALI = 'H' and t.STOK_KODU LIKE '19%' AND miktar-isnull(susk.URETSON_MIKTAR, 0) > 0  AND ek.KT_URT_DURUM='SUSK'";
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             return context.Database.SqlQuery<SUSK_LISTESI_GENEL>(sqlCumle).ToList();
         }
@@ -213,8 +245,7 @@ namespace INF_OTO_SUSK_DataAccessLayer
                 return isemri;
             }
         }
-
-        public int HUCREHAREKETKAYIT(string stok_kodu,decimal miktar,string fisno)
+        public int HUCREHAREKETKAYIT(string stok_kodu, decimal miktar, string fisno)
         {
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
             var depUrun = context.DEPOLOKASYONDURUM_MKA.Where(a => a.STOKKODU == stok_kodu && a.DEPO_KODU == 114 && a.NETBAKIYE > 0).FirstOrDefault();
@@ -228,7 +259,7 @@ namespace INF_OTO_SUSK_DataAccessLayer
             urun.TARIH = DateTime.Now.Date;
             urun.KAYITTARIHI = DateTime.Now.Date;
             urun.KAYITYAPANKUL = "KARAMUKLU";
-            urun.STHARINC = INCKEYBUL(fisno,depUrun.STOKKODU) ;
+            urun.STHARINC = INCKEYBUL(fisno, depUrun.STOKKODU);
             context.TBLDEPHAR.Add(urun);
 
             if (context.SaveChanges() == 1)
@@ -238,11 +269,86 @@ namespace INF_OTO_SUSK_DataAccessLayer
             }
             return 1;
         }
-        public int INCKEYBUL (string fisno,string stok_kodu)
+        public int INCKEYBUL(string fisno, string stok_kodu)
         {
             INF_OTOSUSK_Context context = new INF_OTOSUSK_Context();
-            var inckey = context.TBLSTHAR.Where(i => i.FISNO == fisno && i.STOK_KODU == stok_kodu && i.DEPO_KODU==114).FirstOrDefault();
+            var inckey = context.TBLSTHAR.Where(i => i.FISNO == fisno && i.STOK_KODU == stok_kodu && i.DEPO_KODU == 114).FirstOrDefault();
             return inckey.INCKEYNO;
+        }
+        public void SUSK_DurumGuncelle(TBLURTDURUM uretimEleman)
+        {
+            try
+            {
+                using (MKA_Context context = new MKA_Context())
+                {
+                    //var urun=context.TBLURTDURUM.Where(i=>i.INCKEYNO==uretimEleman.INCKEYNO).upda
+
+
+                    //string sqlCumle = "select * from MKA..TBLURTDURUM where inckeyno=" + uretimEleman.INCKEYNO + " ";
+                    //var urun = context.Database.SqlQuery<TBLURTDURUM>(sqlCumle).FirstOrDefault();
+                    //urun.SUSK_DURUMU = "E";
+                    string updateSql = "update MKA..TBLURTDURUM SET SUSK_DURUMU='E' where inckeyno=" + uretimEleman.INCKEYNO + " ";
+                    context.Database.ExecuteSqlCommand(updateSql);
+                    
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public void SUSK_DurumGuncelleIsemri(string isemrino, string uretim_asama,int inckeyno)
+        {
+            try
+            {
+                using (MKA_Context context = new MKA_Context())
+                {
+                    //var urun = context.TBLURTDURUM.Where(i => i.ISEMRINO == isemrino && i.URETIM_ASAMA==uretim_asama &&i.INCKEYNO== inckeyno).FirstOrDefault();
+                    //urun.SUSK_DURUMU = "E";
+                    //context.SaveChanges();
+
+                    string updateSql = "update MKA..TBLURTDURUM SET SUSK_DURUMU='E' where inckeyno=" + inckeyno + " ";
+                    context.Database.ExecuteSqlCommand(updateSql);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public int SERINO_VARMI(string seriNo)//Netsisteki Serinoyu kontrol ediyor--SUSK işlemi için
+        {
+            using (INF_OTOSUSK_Context context = new INF_OTOSUSK_Context())
+            {
+                string sqlCumle = "SELECT STOK_KODU,SERI_NO,count(*)ADET FROM TBLSERITRA where SERI_NO like '" + seriNo + "' GROUP BY STOK_KODU,SERI_NO";
+                var sonuc = (context.Database.SqlQuery<TBLSERITRA>(sqlCumle).FirstOrDefault());
+                if (sonuc == null)
+                {
+                    return 0;
+                }
+                else
+                    return sonuc.ADET;
+
+            }
+        }
+        public string SUSK_ILISKISI (string stokKodu)
+        {
+            try
+            {
+                using (INF_OTOSUSK_Context context = new INF_OTOSUSK_Context())
+                {
+                    //TBLSTSABITSAHATABLOESLEME obj = new TBLSTSABITSAHATABLOESLEME();
+                    var obj=context.TBLSTSABITSAHATABLOESLEME.Where(i => i.STOK_KODU == stokKodu).FirstOrDefault();
+                    if (obj.KT_SUSK_ILISKISI == null)
+                        return "ILISKIYOK";
+                    else
+                        return obj.KT_SUSK_ILISKISI;
+                }
+            }
+            catch (Exception ex )
+            {
+               return (ex.Message);
+            }
         }
     }
 }

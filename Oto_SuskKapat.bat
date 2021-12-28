@@ -1,0 +1,1 @@
+TASKKILL /F /IM OtoSusk_Winform.exe

@@ -14,6 +14,7 @@ namespace INF_OTO_SUSK_Entities
         public DbSet<DEPOLOKASYONDURUM_MKA> DEPOLOKASYONDURUM_MKA { get; set; }
         public DbSet<TBLDEPHAR> TBLDEPHAR { get; set; }
         public DbSet<TBLSTHAR> TBLSTHAR { get; set; }
+        public DbSet<TBLSTSABITSAHATABLOESLEME> TBLSTSABITSAHATABLOESLEME { get; set; }
 
         //Tabloların sonuna s eklememesi için OnModelCreating metodunu ezdik
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -23,6 +24,7 @@ namespace INF_OTO_SUSK_Entities
             modelBuilder.Entity<DEPOLOKASYONDURUM_MKA>().ToTable("DEPOLOKASYONDURUM_MKA");
             modelBuilder.Entity<TBLDEPHAR>().ToTable("TBLDEPHAR");
             modelBuilder.Entity<TBLSTHAR>().ToTable("TBLSTHAR");
+            modelBuilder.Entity<TBLSTSABITSAHATABLOESLEME>().ToTable("TBLSTSABITSAHATABLOESLEME");
         }
 
     }

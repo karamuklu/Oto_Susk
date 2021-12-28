@@ -21,10 +21,11 @@ namespace INF_OTO_SUSK_BusinessLayer
     public class INF_SUSK_Manager
     {
         public static INF_SUSK_Dal infSusk_Dal = new INF_SUSK_Dal();
-        public List<SUSK_LISTESI_ESTAP> ESTAPSUSK_LISTESI()
-        {
-            return infSusk_Dal.ESTAPSUSK_LISTESI();
-        }
+
+        //public List<SUSK_LISTESI_ESTAP> ESTAPSUSK_LISTESI()
+        //{
+        //    return infSusk_Dal.ESTAPSUSK_LISTESI();
+        //}
         public List<SUSK_LISTESI_MKA> YARIMAMULSUSK_LISTESI_MEK()
         {
             return infSusk_Dal.YARIMAMULSUSK_LISTESI_MEK();
@@ -32,6 +33,18 @@ namespace INF_OTO_SUSK_BusinessLayer
         public List<SUSK_LISTESI_ESTAP> YARIMAMULSUSK_LISTESI_J()
         {
             return infSusk_Dal.YARIMAMULSUSK_LISTESI_J();
+        }
+        public List<SUSK_LISTESI_TRAFO> TRAFOSUSK_LISTESI()
+        {
+            return infSusk_Dal.TRAFOSUSK_LISTESI();
+        }
+        public List<SUSK_LISTESI_KABLO> KABLOSUSK_LISTESI()
+        {
+            return infSusk_Dal.KABLOSUSK_LISTESI();
+        }
+        public List<WIP_SUSK_MKA> WIP_SUSK_LISTESI()
+        {
+            return infSusk_Dal.WIP_SUSK_LISTESI();
         }
         public List<YARIMAMUL> YariMamul_Bul()
         {
@@ -73,6 +86,10 @@ namespace INF_OTO_SUSK_BusinessLayer
         {
             return infSusk_Dal.YARIMAMULSUSK_LISTESI_MKA();
         }
+        public List<TBLURTDURUM> TBLURTDURUM()//Serili Ürün SUSK
+        {
+            return infSusk_Dal.TBLURTDURUM();
+        }
         public void SUSK_Kaydet(SUSK_LISTESI_MKA suskList, int GIRISDEPO, int CIKISDEPO)
         {
             Kernel kernel = new Kernel();
@@ -93,7 +110,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                 susk.UretSon_Mamul = suskList.STOK_KODU;
                 susk.UretSon_Depo = 118; //giriş depo
                 susk.I_Yedek1 = 118;   //çıkış depo
-                susk.UretSon_Miktar = (double)suskList.MIKTAR;
+                susk.UretSon_Miktar = (double)suskList.OKUTMA_MIKTAR;
                 susk.UretSon_Tarih = DateTime.Now.Date;
                 susk.BelgeTipi = TBelgeTipi.btIsEmri;
                 susk.UretSon_SipNo = suskList.ISEMRINO;
@@ -101,7 +118,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                 //susk.F_Yedek1 = (double)suskList.MIKTAR; //miktar2
                 susk.Aciklama = "OTO. SUSK";
                 susk.Proje_Kodu = "G";
-                susk.S_Yedek1 = suskList.REFISEMRINO;
+                //susk.S_Yedek1 = suskList.REFISEMRINO;
                 //susk.S_Yedek2 = "ekalan2 örneği";
                 susk.OTO_YMAM_GIRDI_CIKTI = true;
                 susk.OTO_YMAM_STOK_KULLAN = false;
@@ -112,7 +129,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                     MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş no ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
                        susk.HataMesaji, ConfigurationManager.AppSettings["YariMamulSUSKEmail"]);
                     //MessageBox.Show(susk.HataKodu.ToString() + ' ' + susk.HataMesaji);
-                    infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
                     //infSusk_Dal.IsemriKapat(suskList.ISEMRINO);
                 }
 
@@ -120,20 +137,21 @@ namespace INF_OTO_SUSK_BusinessLayer
                 if (susk.Kaydet() != true)
                 {
                     MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş no ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" + susk.HataMesaji, ConfigurationManager.AppSettings["YariMamulSUSKEmail"]);
-                    infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
 
                 }
                 else
                 {
-                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["YariMamulSUSKEmail"]);//oto mail gönder ,bora.demirkol@inform.com.tr,hakan.sari@inform.com.tr
+                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["YariMamulSUSKEmail"]);
                     //infSusk_Dal.IsemriKapat(suskList.ISEMRINO);
+                    infSusk_Dal.SUSK_DurumGuncelleIsemri(suskList.ISEMRINO,suskList.URETIM_ASAMA,suskList.INCKEYNO);
                 }
             }
             catch (Exception ex)
             {
                 MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş no ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
                    ex.Message, ConfigurationManager.AppSettings["YariMamulSUSKEmail"]);
-                infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
                 //MessageBox.Show(ex.Message);
             }
             finally
@@ -182,14 +200,14 @@ namespace INF_OTO_SUSK_BusinessLayer
                 if (susk.FisUret() != true)
                 {
                     MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş no ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" + susk.HataMesaji, ConfigurationManager.AppSettings["AnaMamulSUSKEmail"]);
-                    infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                   // infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
                 }
 
 
                 if (susk.Kaydet() != true)
                 {
                     MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş no ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" + susk.HataMesaji, ConfigurationManager.AppSettings["AnaMamulSUSKEmail"]);
-                    infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
                     // infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
                 }
 
@@ -200,16 +218,15 @@ namespace INF_OTO_SUSK_BusinessLayer
 
                 else
                 {
-                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["AnaMamulSUSKEmail"]);//oto mail gönder ,bora.demirkol@inform.com.tr,hakan.sari@inform.com.tr
+                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["AnaMamulSUSKEmail"]);
                     //infSusk_Dal.IsemriKapat(suskList.ISEMRINO);
                 }
-
             }
             catch (Exception ex)
             {
                 MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş no ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
                     ex.Message, ConfigurationManager.AppSettings["AnaMamulSUSKEmail"]);
-                infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
                 //MessageBox.Show(ex.Message);
             }
             finally
@@ -219,7 +236,6 @@ namespace INF_OTO_SUSK_BusinessLayer
                 kernel.FreeNetsisLibrary();
                 Marshal.ReleaseComObject(kernel);
             }
-
         }
         public void SUSK_Kaydet(SUSK_LISTESI_EKART suskList, int GIRISDEPO, int CIKISDEPO)
         {
@@ -270,7 +286,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                 }
                 else
                 {
-                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["EkartSUSKEmail"]);//oto mail gönder ,bora.demirkol@inform.com.tr,hakan.sari@inform.com.tr
+                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["EkartSUSKEmail"]);//
                     //infSusk_Dal.IsemriKapat(suskList.ISEMRINO); //Parçalı SUSK yapıldığı için tam olarak istenilen şekilde çalışmıyor.
 
                 }
@@ -330,26 +346,26 @@ namespace INF_OTO_SUSK_BusinessLayer
                     MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
                        susk.HataMesaji, ConfigurationManager.AppSettings["InformSUSKEmail"]);
                     //MessageBox.Show(susk.HataKodu.ToString() + ' ' + susk.HataMesaji);
-                    infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
                     //infSusk_Dal.IsemriKapat(suskList.ISEMRINO);
                 }
 
                 if (susk.Kaydet() != true)
                 {
                     MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" + susk.HataMesaji, ConfigurationManager.AppSettings["InformSUSKEmail"]);
-                    infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
                 }
 
                 else
                 {
-                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["InformSUSKEmail"]);//oto mail gönder ,bora.demirkol@inform.com.tr,hakan.sari@inform.com.tr
+                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["InformSUSKEmail"]);
                 }
             }
             catch (Exception ex)
             {
                 MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
                    ex.Message, ConfigurationManager.AppSettings["InformSUSKEmail"]);
-                infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
                 //MessageBox.Show(ex.Message);
             }
             finally
@@ -360,26 +376,305 @@ namespace INF_OTO_SUSK_BusinessLayer
                 Marshal.ReleaseComObject(kernel);
             }
         }
-        public static bool MailGonder(string konu, string aciklama, string kime)
+        public void SUSK_Kaydet(SUSK_LISTESI_TRAFO suskList, int GIRISDEPO, int CIKISDEPO)
         {
-            SmtpClient smtpClient = new SmtpClient();
-            NetworkCredential basicCredential = new NetworkCredential("mustafa.karamuklu@inform.com.tr", "Password19");
-            MailMessage message = new MailMessage();
-            MailAddress fromAddress = new MailAddress("noreply@legrand.com");
-            smtpClient.Host = "SMTP.LIMOUSIN.FR.GRPLEG.COM";
-            smtpClient.Port = 25; //Gönderici portudur.
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = basicCredential;
-            smtpClient.EnableSsl = false;
-            message.From = fromAddress;
-            message.Subject = konu;
-            message.IsBodyHtml = true; // HTML içeriğine izin verir
-            message.Body = aciklama; // İçeriği oluşturmaktadır.
-            ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
-            message.To.Add(kime);
-            message.Bcc.Add("mustafa.karamuklu@inform.com.tr");
-            smtpClient.Send(message);
-            return true;
+            Kernel kernel = new Kernel();
+            Sirket sirket = default(Sirket);
+            SerbestUSK susk = default(SerbestUSK);
+            try
+            {
+                sirket = kernel.yeniSirket(TVTTipi.vtMSSQL,
+                   ConfigurationManager.AppSettings["SIRKET"],
+                     "TEMELSET",
+                     "",
+                     "karamuklu",
+                     "12qw",
+                     1);
+
+                susk = kernel.yeniSerbestUSK(sirket);
+                susk.UretSon_FisNo = susk.SonFisNumarasi("M");
+                susk.UretSon_Mamul = suskList.STOK_KODU;
+                susk.UretSon_Depo = GIRISDEPO; //giriş depo
+                susk.I_Yedek1 = CIKISDEPO;   //çıkış depo
+                susk.UretSon_Miktar = (double)suskList.MIKTAR;
+                susk.UretSon_Tarih = DateTime.Now.Date;
+                susk.BelgeTipi = TBelgeTipi.btIsEmri;
+                susk.UretSon_SipNo = suskList.ISEMRINO;
+                susk.DepoOnceligi = TDepoOnceligi.doStokDepo;
+                //susk.F_Yedek1 = (double)suskList.MIKTAR; //miktar2
+                susk.Aciklama = "OTO. SUSK";
+                susk.Proje_Kodu = "G";
+                //susk.S_Yedek1 = "ekalan1 örneği";
+                //susk.S_Yedek2 = "ekalan2 örneği";
+                susk.OTO_YMAM_GIRDI_CIKTI = true;
+                susk.OTO_YMAM_STOK_KULLAN = false;
+                susk.BAKIYE_DEPO = 0;  //0:verilen_depo 1:tüm_depolar
+
+                if (susk.FisUret() != true)
+                {
+                    MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
+                       susk.HataMesaji, ConfigurationManager.AppSettings["TrafoSUSKEmail"]);
+                    //MessageBox.Show(susk.HataKodu.ToString() + ' ' + susk.HataMesaji);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                    //infSusk_Dal.IsemriKapat(suskList.ISEMRINO);
+                }
+
+                if (susk.Kaydet() != true)
+                {
+                    MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" + susk.HataMesaji, ConfigurationManager.AppSettings["TrafoSUSKEmail"]);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                }
+
+                else
+                {
+                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["TrafoSUSKEmail"]);
+                }
+            }
+            catch (Exception ex)
+            {
+                MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
+                   ex.Message, ConfigurationManager.AppSettings["TrafoSUSKEmail"]);
+                //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(susk);
+                Marshal.ReleaseComObject(sirket);
+                kernel.FreeNetsisLibrary();
+                Marshal.ReleaseComObject(kernel);
+            }
+        }
+        public void SUSK_Kaydet(SUSK_LISTESI_KABLO suskList, int GIRISDEPO, int CIKISDEPO)
+        {
+            Kernel kernel = new Kernel();
+            Sirket sirket = default(Sirket);
+            SerbestUSK susk = default(SerbestUSK);
+            try
+            {
+                sirket = kernel.yeniSirket(TVTTipi.vtMSSQL,
+                   ConfigurationManager.AppSettings["SIRKET"],
+                     "TEMELSET",
+                     "",
+                     "karamuklu",
+                     "12qw",
+                     1);
+
+                susk = kernel.yeniSerbestUSK(sirket);
+                susk.UretSon_FisNo = susk.SonFisNumarasi("M");
+                susk.UretSon_Mamul = suskList.STOK_KODU;
+
+                //Ürün kodlarına göre Susk deposu değiştirilmeliydi, o sebepten ekledik- revize edilecek tekrar, doğru çalışmıyor
+                //if (SUSK_ILISKISI(suskList.STOK_KODU)=="TRAFO")
+                //    susk.UretSon_Depo = 118;    //çıkış depo
+                //else if ((SUSK_ILISKISI(suskList.STOK_KODU) == "ESTAP"))
+                //    susk.UretSon_Depo = 118;    //çıkış depo
+                //else if (SUSK_ILISKISI(suskList.STOK_KODU)== "ILISKIYOK")
+                susk.UretSon_Depo = GIRISDEPO; //giriş depo
+
+
+                susk.I_Yedek1 = 115;   //çıkış depo
+                susk.UretSon_Miktar = Convert.ToDouble(suskList.MIKTAR);
+                susk.UretSon_Tarih = DateTime.Now.Date;
+                susk.BelgeTipi = TBelgeTipi.btIsEmri;
+                susk.UretSon_SipNo = suskList.ISEMRINO;
+                susk.DepoOnceligi = TDepoOnceligi.doStokDepo;
+                //susk.F_Yedek1 = (double)suskList.MIKTAR; //miktar2
+                susk.Aciklama = "OTO. SUSK";
+                susk.Proje_Kodu = "G";
+                //susk.S_Yedek1 = "ekalan1 örneği";
+                //susk.S_Yedek2 = "ekalan2 örneği";
+                susk.OTO_YMAM_GIRDI_CIKTI = true;
+                susk.OTO_YMAM_STOK_KULLAN = false;
+                susk.BAKIYE_DEPO = 0;  //0:verilen_depo 1:tüm_depolar
+
+                if (susk.FisUret() != true)
+                {
+                    MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
+                       susk.HataMesaji, ConfigurationManager.AppSettings["KabloSUSKEmail"]);
+                    //MessageBox.Show(susk.HataKodu.ToString() + ' ' + susk.HataMesaji);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                    //infSusk_Dal.IsemriKapat(suskList.ISEMRINO);
+                }
+
+                if (susk.Kaydet() != true)
+                {
+                    MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" + susk.HataMesaji, ConfigurationManager.AppSettings["KabloSUSKEmail"]);
+                    ////infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                }
+
+                else
+                {
+                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["KabloSUSKEmail"]);
+                }
+            }
+            catch (Exception ex)
+            {
+                MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
+                   ex.Message, ConfigurationManager.AppSettings["KabloSUSKEmail"]);
+                //.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(susk);
+                Marshal.ReleaseComObject(sirket);
+                kernel.FreeNetsisLibrary();
+                Marshal.ReleaseComObject(kernel);
+            }
+        }
+        public void SUSK_Kaydet(WIP_SUSK_MKA suskList, int GIRISDEPO, int CIKISDEPO)
+        {
+            Kernel kernel = new Kernel();
+            Sirket sirket = default(Sirket);
+            SerbestUSK susk = default(SerbestUSK);
+            try
+            {
+                sirket = kernel.yeniSirket(TVTTipi.vtMSSQL,
+                   ConfigurationManager.AppSettings["SIRKET"],
+                     "TEMELSET",
+                     "",
+                     "karamuklu",
+                     "12qw",
+                     1);
+
+                susk = kernel.yeniSerbestUSK(sirket);
+                susk.UretSon_FisNo = susk.SonFisNumarasi("M");
+                susk.UretSon_Mamul = suskList.STOK_KODU;
+                susk.UretSon_Depo = GIRISDEPO; //giriş depo
+                susk.I_Yedek1 = CIKISDEPO;   //çıkış depo
+                susk.UretSon_Miktar = Convert.ToDouble(suskList.OKUTMAMIKTAR);
+                susk.UretSon_Tarih = DateTime.Now.Date;
+                susk.BelgeTipi = TBelgeTipi.btIsEmri;
+                susk.UretSon_SipNo = suskList.ISEMRINO;
+                susk.DepoOnceligi = TDepoOnceligi.doStokDepo;
+                //susk.F_Yedek1 = (double)suskList.MIKTAR; //miktar2
+                susk.Aciklama = "OTO. SUSK";
+                susk.Proje_Kodu = "G";
+                //susk.S_Yedek1 = "ekalan1 örneği";
+                //susk.S_Yedek2 = "ekalan2 örneği";
+                susk.OTO_YMAM_GIRDI_CIKTI = true;
+                susk.OTO_YMAM_STOK_KULLAN = false;
+                susk.BAKIYE_DEPO = 0;  //0:verilen_depo 1:tüm_depolar
+
+                if (susk.FisUret() != true)
+                {
+                    MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
+                       susk.HataMesaji, ConfigurationManager.AppSettings["WIPSUSKEmail"]);
+                    //MessageBox.Show(susk.HataKodu.ToString() + ' ' + susk.HataMesaji);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                    //infSusk_Dal.IsemriKapat(suskList.ISEMRINO);
+                }
+
+                if (susk.Kaydet() != true)
+                {
+                    MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" + susk.HataMesaji, ConfigurationManager.AppSettings["WIPSUSKEmail"]);
+                    ////infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                }
+
+                else
+                {
+                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["WIPSUSKEmail"]);
+                }
+            }
+            catch (Exception ex)
+            {
+                MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
+                   ex.Message, ConfigurationManager.AppSettings["WIPSUSKEmail"]);
+                //.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(susk);
+                Marshal.ReleaseComObject(sirket);
+                kernel.FreeNetsisLibrary();
+                Marshal.ReleaseComObject(kernel);
+            }
+        }
+        public void SUSK_Kaydet(TBLURTDURUM suskList)//Serili ürünlerin SUSK'sı yapılıyor. İşemri başharfine göre depo kriteri verilecek
+        {
+            Kernel kernel = new Kernel();
+            Sirket sirket = default(Sirket);
+            SerbestUSK susk = default(SerbestUSK);
+            try
+            {
+                sirket = kernel.yeniSirket(TVTTipi.vtMSSQL,
+                   ConfigurationManager.AppSettings["SIRKET"],
+                     "TEMELSET",
+                     "",
+                     "karamuklu",
+                     "12qw",
+                     1);
+
+                susk = kernel.yeniSerbestUSK(sirket);
+                susk.UretSon_FisNo = susk.SonFisNumarasi("M");
+                susk.UretSon_Mamul = suskList.STOK_KODU;
+                susk.UretSon_Depo = 128; //giriş depo
+                if (suskList.ISEMRINO.Substring(0, 1)=="S")
+                   susk.I_Yedek1 = 118;   //çıkış depo
+                else if (suskList.ISEMRINO.Substring(0, 1) == "L")
+                   susk.I_Yedek1 = 118;   //çıkış depo
+                else if (suskList.ISEMRINO.Substring(0, 1) == "B")
+                   susk.I_Yedek1 = 118;   //çıkış depo
+                else
+                   susk.I_Yedek1 = 115;  //çıkış depo
+                
+
+                susk.UretSon_Miktar = 1;
+                susk.UretSon_Tarih = DateTime.Now.Date;
+                susk.BelgeTipi = TBelgeTipi.btIsEmri;
+                susk.UretSon_SipNo = suskList.ISEMRINO;
+                susk.DepoOnceligi = TDepoOnceligi.doStokDepo;
+                //susk.F_Yedek1 = (double)suskList.MIKTAR; //miktar2
+                susk.Aciklama = "OTO. SUSK";
+                susk.Proje_Kodu = "G";
+                //susk.S_Yedek1 = "ekalan1 örneği";
+                //susk.S_Yedek2 = "ekalan2 örneği";
+                susk.OTO_YMAM_GIRDI_CIKTI = true;
+                susk.OTO_YMAM_STOK_KULLAN = false;
+                susk.BAKIYE_DEPO = 0;  //0:verilen_depo 1:tüm_depolar
+                susk.SeriEkle(suskList.SERI_NO, "Oto Susk.", "", "", 1);
+                if (susk.FisUret() != true)
+                {
+                    MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
+                       susk.HataMesaji, ConfigurationManager.AppSettings["SeriliSUSKEmail"]);
+                    //MessageBox.Show(susk.HataKodu.ToString() + ' ' + susk.HataMesaji);
+                    //infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                    //infSusk_Dal.IsemriKapat(suskList.ISEMRINO);
+                }
+
+                if (susk.Kaydet() != true)
+                {
+                    MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" + susk.HataMesaji, ConfigurationManager.AppSettings["SeriliSUSKEmail"]);
+                    ////infSusk_Dal.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                }
+
+                else
+                {
+                    MailGonder("Bilgi... SUSK Yapılan İşemri " + suskList.ISEMRINO + "  " + suskList.STOK_KODU+ suskList.SERI_NO, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri ve "+suskList.SERI_NO+" Seri no,  "  + susk.UretSon_FisNo + " fiş numarası ile  otomatik olarak SUSK yapılmıştır.", ConfigurationManager.AppSettings["SeriliSUSKEmail"]);
+                    infSusk_Dal.SUSK_DurumGuncelle(suskList);
+                }
+            }
+            catch (Exception ex)
+            {
+                MailGonder("Uyarı... Eksik Malzeme - SUSK YAPILAMAYAN İŞEMRİ " + suskList.ISEMRINO + "  " + suskList.STOK_KODU, suskList.STOK_KODU + " stok kodu için açılmış olan " + suskList.ISEMRINO + " nolu işemri " + susk.UretSon_FisNo + " fiş numarası ile SUSK fiş numarası ile SUSK yapılırken eksik malzemeden dolayı TAMAMLANAMAMIŞTIR..." + " " + "" +
+                   ex.Message, ConfigurationManager.AppSettings["SeriliSUSKEmail"]);
+                //.IsEmriUSK_STATUSGuncelle(suskList.ISEMRINO);
+                //MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(susk);
+                Marshal.ReleaseComObject(sirket);
+                kernel.FreeNetsisLibrary();
+                Marshal.ReleaseComObject(kernel);
+            }
+        }
+        public int SERINO_VARMI(string seriNo)//Netsisteki Serinoyu kontrol ediyor--SUSK işlemi için
+        {
+            return infSusk_Dal.SERINO_VARMI(seriNo);
+
         }
         public void LokalDepolarArasiTransferBelgesi(List<YARIMAMUL> transferList)
         {
@@ -443,7 +738,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                     fatKalem.Irsaliyeno = "OTO AKTARIM";
                 }
                 fatura.kayitYeni();
-                MailGonder("Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);//,bora.demirkol@inform.com.tr
+                MailGonder("Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
             }
             finally
             {
@@ -617,7 +912,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                             infSusk_Dal.HUCREHAREKETKAYIT(item.STOKKODU, item.NETMIKTAR, item.DEPOHARFISNO);
                         }
                     }
-                    MailGonder("Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
+                    MailGonder("E-KART - Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", "E-KART - "+ fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
                 }
             }
             finally
@@ -633,7 +928,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                 }
                 catch (Exception)
                 {
-                    AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
+                    //AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
                 }
             }
         }
@@ -680,7 +975,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                 fatUst.KDV_DAHILMI = true;
                 fatUst.EKACK1 = "MEKANIK - Otomatik Aktarım - Depo Transfer Fişi";
 
-                
+
                 var depharList = new List<TBLDEPHAR>();
 
                 foreach (var item in transferList)
@@ -688,7 +983,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                     if ((double)item.ILKTRANSFERMIKTAR != 0)
                     {
                         fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
-                        fatKalem.Gir_Depo_Kodu = 115;               //Depo Kodu lazım Giriş
+                        fatKalem.Gir_Depo_Kodu = 118; //Depo Kodu lazım Giriş
                         fatKalem.DEPO_KODU = item.ILKTRANSFER_DEPO;                   //Depo Kodu lazım Çıkış
                         fatKalem.STra_GCMIK = (double)item.ILKTRANSFERMIKTAR;
                         fatKalem.ProjeKodu = "G";
@@ -728,7 +1023,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                             infSusk_Dal.HUCREHAREKETKAYIT(item.STOKKODU, item.NETMIKTAR, item.DEPOHARFISNO);
                         }
                     }
-                    MailGonder("Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
+                    MailGonder("Mekanik - Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", "Mekanik - " +fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
                 }
             }
 
@@ -745,7 +1040,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                 }
                 catch (Exception)
                 {
-                    AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.","Depo Transfer Kontrol",2000); 
+                    //AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
                 }
             }
         }
@@ -848,7 +1143,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                     {
                         fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
                         fatKalem.Gir_Depo_Kodu = 115;               //Depo Kodu lazım Giriş
-                        fatKalem.DEPO_KODU = item.DORDUNCUTRANSFER_DEPO;                   //Depo Kodu lazım Çıkış
+                        fatKalem.DEPO_KODU = item.DORDUNCUTRANSFER_DEPO; //Depo Kodu lazım Çıkış
                         fatKalem.STra_GCMIK = (double)item.DORDUNCUTRANSFER;
                         fatKalem.ProjeKodu = "G";
                         fatKalem.ReferansKodu = "1U1151";// Bu kısımda önemli.Bağlı siparişe bakıp çekilebilir
@@ -867,7 +1162,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                             infSusk_Dal.HUCREHAREKETKAYIT(item.STOKKODU, item.NETMIKTAR, item.DEPOHARFISNO);
                         }
                     }
-                    MailGonder("Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
+                    MailGonder("WIP CIHAZ - Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", "WIP CIHAZ - " +fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
                 }
 
 
@@ -885,7 +1180,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                 }
                 catch (Exception)
                 {
-                    AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
+                   // AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
                 }
             }
         }
@@ -943,7 +1238,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                     if ((double)item.ILKTRANSFERMIKTAR != 0)
                     {
                         fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
-                        fatKalem.Gir_Depo_Kodu = 115;               //Depo Kodu lazım Giriş
+                        fatKalem.Gir_Depo_Kodu = 118;               //Depo Kodu lazım Giriş
                         fatKalem.DEPO_KODU = item.ILKTRANSFER_DEPO;                   //Depo Kodu lazım Çıkış
                         fatKalem.STra_GCMIK = (double)item.ILKTRANSFERMIKTAR;
                         fatKalem.ProjeKodu = "G";
@@ -987,14 +1282,14 @@ namespace INF_OTO_SUSK_BusinessLayer
                     {
                         fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
                         fatKalem.Gir_Depo_Kodu = 118;               //Depo Kodu lazım Giriş
-                        fatKalem.DEPO_KODU = item.DORDUNCUTRANSFER_DEPO;                   //Depo Kodu lazım Çıkış
+                        fatKalem.DEPO_KODU = item.DORDUNCUTRANSFER_DEPO; //Depo Kodu lazım Çıkış
                         fatKalem.STra_GCMIK = (double)item.DORDUNCUTRANSFER;
                         fatKalem.ProjeKodu = "G";
                         fatKalem.ReferansKodu = "1U0250";// Bu kısımda önemli.Bağlı siparişe bakıp çekilebilir
                         //fatKalem.Irsaliyeno = "OTO AKTARIM";
                     }
                 }
-              
+
 
                 if (fatura.KalemAdedi != 0)
                 {
@@ -1007,7 +1302,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                             infSusk_Dal.HUCREHAREKETKAYIT(item.STOKKODU, item.NETMIKTAR, item.DEPOHARFISNO);
                         }
                     }
-                    MailGonder("Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
+                    MailGonder("Estap - Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi","Estap - "+ fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
                 }
             }
             finally
@@ -1023,7 +1318,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                 }
                 catch (Exception)
                 {
-                    AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
+                   // AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
                 }
             }
         }
@@ -1125,7 +1420,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                     {
                         fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
                         fatKalem.Gir_Depo_Kodu = 115; //Depo Kodu lazım Giriş
-                        fatKalem.DEPO_KODU = item.DORDUNCUTRANSFER_DEPO;                   //Depo Kodu lazım Çıkış
+                        fatKalem.DEPO_KODU = item.DORDUNCUTRANSFER_DEPO; //Depo Kodu lazım Çıkış
                         fatKalem.STra_GCMIK = (double)item.DORDUNCUTRANSFER;
                         fatKalem.ProjeKodu = "G";
                         fatKalem.ReferansKodu = "1U1151";// Bu kısımda önemli.Bağlı siparişe bakıp çekilebilir
@@ -1145,7 +1440,7 @@ namespace INF_OTO_SUSK_BusinessLayer
                             infSusk_Dal.HUCREHAREKETKAYIT(item.STOKKODU, item.NETMIKTAR, item.DEPOHARFISNO);
                         }
                     }
-                    MailGonder("Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur. Cihazlar için SUSK işlemine başlayabilirsiniz...", ConfigurationManager.AppSettings["CihazTransferEmail"]);
+                    MailGonder("Cihaz - Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", "Cihaz - " + fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur. Cihazlar için SUSK işlemine başlayabilirsiniz...", ConfigurationManager.AppSettings["CihazTransferEmail"]);
                 }
             }
             finally
@@ -1161,13 +1456,287 @@ namespace INF_OTO_SUSK_BusinessLayer
                 }
                 catch (Exception)
                 {
-                    AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
+                    //AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
                 }
             }
         }
+        public void LokalDepolarArasiTransferBelgesi(List<TRAFO_TRANSFER> transferList)
+        {
+            //aktarım için lazım olan kalemler, hammadde kodu, transfer miktar
+            //Üst bilgiler sabit, kalem bilgilerini foreach ile dönüp aktarımı yaptırabiliriz.
+
+            string appPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string configFile = System.IO.Path.Combine(appPath, System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".exe.config");
+
+            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            configFileMap.ExeConfigFilename = configFile;
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+
+            Kernel kernel = new Kernel();
+            Sirket sirket = default(Sirket);
+            Fatura fatura = default(Fatura);
+            FatUst fatUst = default(FatUst);
+            FatKalem fatKalem = default(FatKalem);
+            try
+            {
+                sirket = kernel.yeniSirket(TVTTipi.vtMSSQL,
+                                              ConfigurationManager.AppSettings["SIRKET"],
+                                              "TEMELSET",
+                                              "",
+                                              "karamuklu",
+                                              "12qw",
+                                              1);
+                fatura = kernel.yeniFatura(sirket, TFaturaTip.ftLokalDepo);
+                fatUst = fatura.Ust();
+                fatUst.FATIRS_NO = fatura.YeniNumara("X");
+                fatUst.KOD2 = "D";
+                //fatUst.CariKod = "1";
+                fatUst.CARI_KOD2 = "1";
+                fatUst.TIPI = TFaturaTipi.ft_Bos;
+                fatUst.AMBHARTUR = TAmbarHarTur.htDepolar;
+                fatUst.Tarih = DateTime.Now.Date;
+                fatUst.FiiliTarih = DateTime.Now.Date;
+                fatUst.PLA_KODU = "D";
+                fatUst.Proje_Kodu = "G";
+                fatUst.Aciklama = "OTO. AKTARIM";
+                fatUst.EFatOzelKod = 'D';
+                fatUst.KDV_DAHILMI = true;
+                fatUst.EKACK1 = "TRAFO - Otomatik Aktarım - Depo Transfer Fişi";
+
+                //string inc_HAMKODU = "";
+                //decimal inc_ILKTRANSFERMIKTAR = 0;
+                //string inc_FISNO = "";
+
+                var depharList = new List<TBLDEPHAR>();
+
+                foreach (var item in transferList)
+                {
+                    if ((double)item.ILKTRANSFERMIKTAR != 0)
+                    {
+                        fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
+                        fatKalem.Gir_Depo_Kodu = 118;               //Depo Kodu lazım Giriş
+                        fatKalem.DEPO_KODU = item.ILKTRANSFER_DEPO; //Depo Kodu lazım Çıkış
+                        fatKalem.STra_GCMIK = (double)item.ILKTRANSFERMIKTAR;
+                        fatKalem.ProjeKodu = "G";
+                        fatKalem.ReferansKodu = "1U1134";// Bu kısımda önemli.Bağlı siparişe bakıp çekilebilir
+
+                        TBLDEPHAR dephar = new TBLDEPHAR();
+                        dephar.STOKKODU = item.HAM_KODU;
+                        dephar.NETMIKTAR = item.ILKTRANSFERMIKTAR;
+                        dephar.DEPOHARFISNO = fatUst.FATIRS_NO;
+                        depharList.Add(dephar);
+
+                        //inc_HAMKODU = item.HAM_KODU;
+                        //inc_ILKTRANSFERMIKTAR = item.ILKTRANSFERMIKTAR;
+                        //inc_FISNO = fatUst.FATIRS_NO;
+                    }
+
+                    if ((double)item.IKINCITRANSFER != 0)
+                    {
+                        fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
+                        fatKalem.Gir_Depo_Kodu = 118;               //Depo Kodu lazım Giriş
+                        fatKalem.DEPO_KODU = item.IKINCITRANSFER_DEPO;
+                        fatKalem.STra_GCMIK = (double)item.IKINCITRANSFER;
+                        fatKalem.ProjeKodu = "G";
+                        fatKalem.ReferansKodu = "1U1134";// Bu kısımda önemli.Bağlı siparişe bakıp çekilebilir
 
 
+                    }//Depo Kodu lazım Çıkış
 
+                    if ((double)item.UCUNCUTRANSFER != 0)
+                    {
+                        fatKalem = fatura.kalemYeni(item.HAM_KODU);
+                        fatKalem.Gir_Depo_Kodu = 118;
+                        fatKalem.DEPO_KODU = item.UCUNCUTRANSFER_DEPO;
+                        fatKalem.STra_GCMIK = (double)item.UCUNCUTRANSFER;
+                        fatKalem.ProjeKodu = "G";
+                        fatKalem.ReferansKodu = "1U1134";
+                        //fatKalem.Irsaliyeno = "OTO AKTARIM";
+                    }
+
+                    if ((double)item.DORDUNCUTRANSFER != 0)
+                    {
+                        fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
+                        fatKalem.Gir_Depo_Kodu = 118; //Depo Kodu lazım Giriş
+                        fatKalem.DEPO_KODU = item.DORDUNCUTRANSFER_DEPO; //Depo Kodu lazım Çıkış
+                        fatKalem.STra_GCMIK = (double)item.DORDUNCUTRANSFER;
+                        fatKalem.ProjeKodu = "G";
+                        fatKalem.ReferansKodu = "1U1134";// Bu kısımda önemli.Bağlı siparişe bakıp çekilebilir
+                        //fatKalem.Irsaliyeno = "OTO AKTARIM";
+                    }
+                }
+
+
+                if (fatura.KalemAdedi != 0)
+                {
+                    fatura.kayitYeni();
+                    //Dinamik Depo Hareketi atan kod
+                    if (depharList.Count != 0)
+                    {
+                        foreach (var item in depharList)
+                        {
+                            infSusk_Dal.HUCREHAREKETKAYIT(item.STOKKODU, item.NETMIKTAR, item.DEPOHARFISNO);
+                        }
+                    }
+                    MailGonder("Trafo - Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", "Trafo - " + fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur.", ConfigurationManager.AppSettings["DepoTransferEmail"]);
+                }
+            }
+            finally
+            {
+                try
+                {
+                    Marshal.ReleaseComObject(fatKalem);
+                    Marshal.ReleaseComObject(fatUst);
+                    Marshal.ReleaseComObject(fatura);
+                    Marshal.ReleaseComObject(sirket);
+                    kernel.FreeNetsisLibrary();
+                    Marshal.ReleaseComObject(kernel);
+                }
+                catch (Exception)
+                {
+                    //AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
+                }
+            }
+        }
+        public void LokalDepolarArasiTransferBelgesi(List<KABLO_TRANSFER> transferList)
+        {
+            //aktarım için lazım olan kalemler, hammadde kodu, transfer miktar
+            //Üst bilgiler sabit, kalem bilgilerini foreach ile dönüp aktarımı yaptırabiliriz.
+
+            string appPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string configFile = System.IO.Path.Combine(appPath, System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".exe.config");
+
+            ExeConfigurationFileMap configFileMap = new ExeConfigurationFileMap();
+            configFileMap.ExeConfigFilename = configFile;
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configFileMap, ConfigurationUserLevel.None);
+
+            Kernel kernel = new Kernel();
+            Sirket sirket = default(Sirket);
+            Fatura fatura = default(Fatura);
+            FatUst fatUst = default(FatUst);
+            FatKalem fatKalem = default(FatKalem);
+            try
+            {
+                sirket = kernel.yeniSirket(TVTTipi.vtMSSQL,
+                                              ConfigurationManager.AppSettings["SIRKET"],
+                                              "TEMELSET",
+                                              "",
+                                              "karamuklu",
+                                              "12qw",
+                                              1);
+                fatura = kernel.yeniFatura(sirket, TFaturaTip.ftLokalDepo);
+                fatUst = fatura.Ust();
+                fatUst.FATIRS_NO = fatura.YeniNumara("X");
+                fatUst.KOD2 = "D";
+                //fatUst.CariKod = "1";
+                fatUst.CARI_KOD2 = "1";
+                fatUst.TIPI = TFaturaTipi.ft_Bos;
+                fatUst.AMBHARTUR = TAmbarHarTur.htDepolar;
+                fatUst.Tarih = DateTime.Now.Date;
+                fatUst.FiiliTarih = DateTime.Now.Date;
+                fatUst.PLA_KODU = "D";
+                fatUst.Proje_Kodu = "G";
+                fatUst.Aciklama = "OTO. AKTARIM";
+                fatUst.EFatOzelKod = 'D';
+                fatUst.KDV_DAHILMI = true;
+                fatUst.EKACK1 = "KABLO - Otomatik Aktarım - Depo Transfer Fişi";
+
+                //string inc_HAMKODU = "";
+                //decimal inc_ILKTRANSFERMIKTAR = 0;
+                //string inc_FISNO = "";
+
+                var depharList = new List<TBLDEPHAR>();
+
+                foreach (var item in transferList)
+                {
+                    if ((double)item.ILKTRANSFERMIKTAR != 0)
+                    {
+                        fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
+                        fatKalem.Gir_Depo_Kodu = 115;               //Depo Kodu lazım Giriş
+                        fatKalem.DEPO_KODU = item.ILKTRANSFER_DEPO; //Depo Kodu lazım Çıkış
+                        fatKalem.STra_GCMIK = (double)item.ILKTRANSFERMIKTAR;
+                        fatKalem.ProjeKodu = "G";
+                        fatKalem.ReferansKodu = "1U1161";// Bu kısımda önemli.Bağlı siparişe bakıp çekilebilir
+
+                        TBLDEPHAR dephar = new TBLDEPHAR();
+                        dephar.STOKKODU = item.HAM_KODU;
+                        dephar.NETMIKTAR = item.ILKTRANSFERMIKTAR;
+                        dephar.DEPOHARFISNO = fatUst.FATIRS_NO;
+                        depharList.Add(dephar);
+
+                        //inc_HAMKODU = item.HAM_KODU;
+                        //inc_ILKTRANSFERMIKTAR = item.ILKTRANSFERMIKTAR;
+                        //inc_FISNO = fatUst.FATIRS_NO;
+                    }
+
+                    if ((double)item.IKINCITRANSFER != 0)
+                    {
+                        fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
+                        fatKalem.Gir_Depo_Kodu = 115;               //Depo Kodu lazım Giriş
+                        fatKalem.DEPO_KODU = item.IKINCITRANSFER_DEPO;
+                        fatKalem.STra_GCMIK = (double)item.IKINCITRANSFER;
+                        fatKalem.ProjeKodu = "G";
+                        fatKalem.ReferansKodu = "1U1161";// Bu kısımda önemli.Bağlı siparişe bakıp çekilebilir
+
+
+                    }//Depo Kodu lazım Çıkış
+
+                    if ((double)item.UCUNCUTRANSFER != 0)
+                    {
+                        fatKalem = fatura.kalemYeni(item.HAM_KODU);
+                        fatKalem.Gir_Depo_Kodu = 115;
+                        fatKalem.DEPO_KODU = item.UCUNCUTRANSFER_DEPO;
+                        fatKalem.STra_GCMIK = (double)item.UCUNCUTRANSFER;
+                        fatKalem.ProjeKodu = "G";
+                        fatKalem.ReferansKodu = "1U1161";
+                        //fatKalem.Irsaliyeno = "OTO AKTARIM";
+                    }
+
+                    if ((double)item.DORDUNCUTRANSFER != 0)
+                    {
+                        fatKalem = fatura.kalemYeni(item.HAM_KODU);//stok kodu lazım
+                        fatKalem.Gir_Depo_Kodu = 115; //Depo Kodu lazım Giriş
+                        fatKalem.DEPO_KODU = item.DORDUNCUTRANSFER_DEPO; //Depo Kodu lazım Çıkış
+                        fatKalem.STra_GCMIK = (double)item.DORDUNCUTRANSFER;
+                        fatKalem.ProjeKodu = "G";
+                        fatKalem.ReferansKodu = "1U1161";// Bu kısımda önemli.Bağlı siparişe bakıp çekilebilir
+                        //fatKalem.Irsaliyeno = "OTO AKTARIM";
+                    }
+                }
+
+
+                if (fatura.KalemAdedi != 0)
+                {
+                    fatura.kayitYeni();
+                    //Dinamik Depo Hareketi atan kod
+                    if (depharList.Count != 0)
+                    {
+                        foreach (var item in depharList)
+                        {
+                            infSusk_Dal.HUCREHAREKETKAYIT(item.STOKKODU, item.NETMIKTAR, item.DEPOHARFISNO);
+                        }
+                    }
+                    MailGonder("Kablo - Otomatik oluşturulan " + fatUst.FATIRS_NO + " no'lu Depo Transfer Fişi", "Kablo - " + fatUst.FATIRS_NO + " numaralı Depo Transfer Fişi sistemde oluşturulmuştur. Cihazlar için SUSK işlemine başlayabilirsiniz...", ConfigurationManager.AppSettings["DepoTransferEmail"]);
+                }
+            }
+            finally
+            {
+                try
+                {
+                    Marshal.ReleaseComObject(fatKalem);
+                    Marshal.ReleaseComObject(fatUst);
+                    Marshal.ReleaseComObject(fatura);
+                    Marshal.ReleaseComObject(sirket);
+                    kernel.FreeNetsisLibrary();
+                    Marshal.ReleaseComObject(kernel);
+                }
+                catch (Exception)
+                {
+                    //AutoClosingMessageBox.Show("Transfer edilecek kayıt bulunamadı, Sonraki işleme geçilecektir.", "Depo Transfer Kontrol", 2000);
+                }
+            }
+        }
+                
         public List<EKART_TRANSFER> EKART_TRANSFERLIST()
         {
             return infSusk_Dal.EKART_TRANSFERLIST();
@@ -1188,6 +1757,19 @@ namespace INF_OTO_SUSK_BusinessLayer
         {
             return infSusk_Dal.CIHAZ_TRANSFERLIST();
         }
+        public List<TRAFO_TRANSFER> TRAFO_TRANSFERLIST()
+        {
+            return infSusk_Dal.TRAFO_TRANSFERLIST();
+        }
+        public List<KABLO_TRANSFER> KABLO_TRANSFERLIST()
+        {
+            return infSusk_Dal.KABLO_TRANSFERLIST();
+        }
+        public string SUSK_ILISKISI(string stokKodu)
+        {
+            return infSusk_Dal.SUSK_ILISKISI(stokKodu);
+        }
+
         public class AutoClosingMessageBox
         {
             System.Threading.Timer _timeoutTimer;
@@ -1217,9 +1799,29 @@ namespace INF_OTO_SUSK_BusinessLayer
             [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
             static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
         }
+        public static bool MailGonder(string konu, string aciklama, string kime)
+        {
+            SmtpClient smtpClient = new SmtpClient();
+            NetworkCredential basicCredential = new NetworkCredential("mustafa.karamuklu@inform.com.tr", "Password99");
+            MailMessage message = new MailMessage();
+            MailAddress fromAddress = new MailAddress("noreply@legrand.com");
+            smtpClient.Host = "SMTP.LIMOUSIN.FR.GRPLEG.COM";
+            smtpClient.Port = 25; //Gönderici portudur.
+            smtpClient.UseDefaultCredentials = false;
+            smtpClient.Credentials = basicCredential;
+            smtpClient.EnableSsl = false;
+            message.From = fromAddress;
+            message.Subject = konu;
+            message.IsBodyHtml = true; // HTML içeriğine izin verir
+            message.Body = aciklama; // İçeriği oluşturmaktadır.
+            ServicePointManager.ServerCertificateValidationCallback = delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
+            message.To.Add(kime);
+            message.Bcc.Add("mustafa.karamuklu@inform.com.tr");
+            smtpClient.Send(message);
+            return true;
+        }
 
     }
-
     public class InnerOperation
     {
         System.Timers.Timer timer = new System.Timers.Timer();
@@ -1265,21 +1867,52 @@ namespace INF_OTO_SUSK_BusinessLayer
             INF_SUSK_Manager infSusk_Manager = new INF_SUSK_Manager();
 
 
-
-            //GIRIS20 tablosundaki işemirlerinin eksikleri transfer ediliyor.
+            //MKA TBLURTDURUM tablosundaki işemirlerinin eksikleri transfer ediliyor.
             var mekanik_list = infSusk_Manager.MEKANIK_TRANSFERLIST();
             if (mekanik_list.Count != 0)
             {
                 infSusk_Manager.LokalDepolarArasiTransferBelgesi(mekanik_list);
             }
 
-            //GIRIS20 tablosundaki Mekanik Yarımamul işemirleri toplanıp, SUSK yapılıyor
+            //MKA TBLURTDURUM tablosundaki Mekanik Yarımamul işemirleri toplanıp, SUSK yapılıyor
             List<SUSK_LISTESI_MKA> yariMamulMekList = new List<SUSK_LISTESI_MKA>();
             yariMamulMekList = infSusk_Manager.YARIMAMULSUSK_LISTESI_MEK();
             foreach (var item in yariMamulMekList)
             {
                 infSusk_Manager.SUSK_Kaydet(item, 118, 118);
             }
+
+
+            //GIRIS20 tablosundaki trafo işemirlerinin eksikleri transfer ediliyor.
+            var trafo_list = infSusk_Manager.TRAFO_TRANSFERLIST();
+            if (trafo_list.Count != 0)
+            {
+                infSusk_Manager.LokalDepolarArasiTransferBelgesi(trafo_list);
+            }
+
+            //Trafo
+            List<SUSK_LISTESI_TRAFO> SuskListTrafo = new List<SUSK_LISTESI_TRAFO>();
+            SuskListTrafo = infSusk_Manager.TRAFOSUSK_LISTESI();
+            foreach (var item in SuskListTrafo)
+            {
+                infSusk_Manager.SUSK_Kaydet(item, 118, 118);
+            }
+
+
+            //Kablo Eksik Malzeme Transfer Listesi
+            var kablo_list = infSusk_Manager.KABLO_TRANSFERLIST();
+            if (kablo_list.Count != 0)
+            {
+                infSusk_Manager.LokalDepolarArasiTransferBelgesi(kablo_list);
+            }
+            //Kablo Susk
+            List<SUSK_LISTESI_KABLO> SuskListKablo = new List<SUSK_LISTESI_KABLO>();
+            SuskListKablo = infSusk_Manager.KABLOSUSK_LISTESI();
+            foreach (var item in SuskListKablo)
+            {
+                infSusk_Manager.SUSK_Kaydet(item, 131, 115);
+            }
+
 
             //ElektronikKart SUsk yapılıyor.
             List<SUSK_LISTESI_EKART> SuskListEkart = new List<SUSK_LISTESI_EKART>();
@@ -1315,23 +1948,30 @@ namespace INF_OTO_SUSK_BusinessLayer
 
 
             //Hakanın anamamül listesinin eksikleri transfer ediliyor
-            var Estap_list = infSusk_Manager.ESTAP_TRANSFERLIST();
-            if (Estap_list.Count != 0)
-            {
-                infSusk_Manager.LokalDepolarArasiTransferBelgesi(Estap_list);
-            }
+
+            //var Estap_list = infSusk_Manager.ESTAP_TRANSFERLIST();
+            //if (Estap_list.Count != 0)
+            //{
+            //    infSusk_Manager.LokalDepolarArasiTransferBelgesi(Estap_list);
+            //}
 
             //Hakanın anamamül listesi alınıyor
-            List<SUSK_LISTESI_ESTAP> estapSuskList = new List<SUSK_LISTESI_ESTAP>();
-            estapSuskList = infSusk_Manager.ESTAPSUSK_LISTESI();//Estap Anamamuller Bulunur
+            //List<SUSK_LISTESI_ESTAP> estapSuskList = new List<SUSK_LISTESI_ESTAP>();
+            //estapSuskList = infSusk_Manager.ESTAPSUSK_LISTESI();//Estap Anamamuller Bulunur
 
 
-            //Hakanın anamamül listesi SUSK yapılıyor.
-            List<SUSK_LISTESI_ESTAP> estapAnamamulSuskList = new List<SUSK_LISTESI_ESTAP>();
-            estapAnamamulSuskList = infSusk_Manager.ESTAPSUSK_LISTESI();
-            foreach (var item in estapAnamamulSuskList)
+            ////Hakanın anamamül listesi SUSK yapılıyor.
+            //List<SUSK_LISTESI_ESTAP> estapAnamamulSuskList = new List<SUSK_LISTESI_ESTAP>();
+            //estapAnamamulSuskList = infSusk_Manager.ESTAPSUSK_LISTESI();
+            //foreach (var item in estapAnamamulSuskList)
+            //{
+            //    infSusk_Manager.SUSK_Kaydet(item, 128, 118);
+            //}
+
+            var Cihaz_list = infSusk_Manager.CIHAZ_TRANSFERLIST();
+            if (Cihaz_list.Count != 0)
             {
-                infSusk_Manager.SUSK_Kaydet(item, 128, 118);
+                infSusk_Manager.LokalDepolarArasiTransferBelgesi(Cihaz_list);
             }
 
 

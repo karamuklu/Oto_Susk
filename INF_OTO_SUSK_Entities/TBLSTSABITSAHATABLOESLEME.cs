@@ -7,14 +7,11 @@ using System.Threading.Tasks;
 
 namespace INF_OTO_SUSK_Entities
 {
-    public class SUSK_LISTESI_MKA
+    public class TBLSTSABITSAHATABLOESLEME
     {
-        //public DateTime TARIH { get; set; }
         [Key]
-        public string ISEMRINO { get; set; }
         public string STOK_KODU { get; set; }
-        public decimal OKUTMA_MIKTAR { get; set; }
-        public string URETIM_ASAMA { get; set; }
-        public int INCKEYNO { get; set; }
+
+        public string KT_SUSK_ILISKISI { get; set; }
     }
 }
